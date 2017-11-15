@@ -1,5 +1,5 @@
 #Google Analytics 
-first download package by composer with composer require elsadany/google-analytics 
+first download package by composer with< composer require elsadany/google-analytics dev-master> 
 - /add Elsadany\Analytics\AnalyticsServiceProvider::class, to config/app ->providers 
 - /run php artisan vendor:publish the config file analyticsConfig.php 
 - /put view_id from google analytics dashboard Admin->viewSettings->View ID

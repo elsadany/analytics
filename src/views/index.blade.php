@@ -6,7 +6,7 @@
         <h2>Home page</h2>
     </div>
 </div>
-<div class="container">
+<div class="">
     <div class="row">
 
         <div class="col-lg-3">

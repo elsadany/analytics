@@ -1,0 +1,19 @@
+{
+    "name": "elsadany/google-analytics",
+    "description": "retrive results from google analytics",
+    "require": {
+        "google/apiclient": "2.2"
+    },
+    "authors": [
+        {
+            "name": "ahmedelsadany",
+            "email": "eng.ahmedelsadany1@gmail.com"
+        }
+    ],
+    "autoload":{
+      "psr-4": {
+            "Elsadany\\Analytics\\": "src/"
+        }
+    },
+    "minimum-stability": "beta"
+}

@@ -2,5 +2,5 @@
 
  
 Route::get('google-analytics/show', 
-  'Elsadany\Analytics\analyticsController@index');
+  'Elsadany\Analytics\AnalyticsController@index');
  

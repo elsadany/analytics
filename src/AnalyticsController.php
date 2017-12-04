@@ -13,7 +13,7 @@ use Google_Service_AnalyticsReporting_Dimension;
 use Google_Service_AnalyticsReporting_ReportRequest;
 use Google_Service_AnalyticsReporting_GetReportsRequest;
 
-class analyticsController extends Controller {
+class AnalyticsController extends Controller {
 
     public function index() {
         $view_id = config('analyticsConfig.view_id');

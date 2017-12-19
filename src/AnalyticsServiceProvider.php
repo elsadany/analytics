@@ -16,7 +16,7 @@ class AnalyticsServiceProvider extends ServiceProvider {
             $this->publishes([__DIR__ . '/config' => base_path('config')]);
         }
         include __DIR__ . '/routes.php';
-        $this->app->make('Elsadany\Analytics\analyticsController');
+        $this->app->make('Elsadany\Analytics\AnalyticsController');
 
 
 

@@ -12,42 +12,83 @@ use Google_Service_AnalyticsReporting_Metric;
 use Google_Service_AnalyticsReporting_Dimension;
 use Google_Service_AnalyticsReporting_ReportRequest;
 use Google_Service_AnalyticsReporting_GetReportsRequest;
+use Carbon\Carbon;
 
 class AnalyticsController extends Controller {
 
     public function index() {
         $view_id = config('analyticsConfig.view_id');
-        $analytics = self::initializeAnalytics();
+        $analytics = \Cache::remember('analytics_' . $view_id, Carbon::now()->addday(), function() {
+                    return self::initializeAnalytics();
+                });
 
+        $yearsessions = \Cache::remember('yearsessions_' . $view_id, Carbon::now()->addday(), function()use($analytics, $view_id) {
+                    return $this->getresult($analytics, $view_id, '365daysAgo', 'today', 'ga:sessions');
+                });
 
-        $yearsessions = $this->getresult($analytics, $view_id, '365daysAgo', 'today', 'ga:sessions');
-        $monthsessions = $this->getresult($analytics, $view_id, '30daysAgo', 'today', 'ga:sessions');
-        $weeksessions = $this->getresult($analytics, $view_id, '7daysAgo', 'today', 'ga:sessions');
-        $daysessions = $this->getresult($analytics, $view_id, '1daysAgo', 'today', 'ga:sessions');
-        $data['year'] = $this->printResults($yearsessions);
-        $data['month'] = $this->printResults($monthsessions);
-        $data['week'] = $this->printResults($weeksessions);
-        $data['day'] = $this->printResults($daysessions);
-        $analytic = $this->getinitializeAnalytics();
-        $pageviwesobject = self::getReport($analytic, $view_id, '30daysAgo', 'today', array(
-                    'ga:pagePath'));
+        $monthsessions = \Cache::remember('monthsessions_' . $view_id, Carbon::now()->addday(), function()use($analytics, $view_id) {
+                    return $this->getresult($analytics, $view_id, '30daysAgo', 'today', 'ga:sessions');
+                });
+        $weeksessions = \Cache::remember('weeksessions_' . $view_id, Carbon::now()->addday(), function()use($analytics, $view_id) {
+                    return $this->getresult($analytics, $view_id, '7daysAgo', 'today', 'ga:sessions');
+                });
+        $daysessions = \Cache::remember('daysessions_' . $view_id, Carbon::now()->addday(), function()use($analytics, $view_id) {
+                    return $this->getresult($analytics, $view_id, '1daysAgo', 'today', 'ga:sessions');
+                });
+        $data['year'] = \Cache::remember('year_' . $view_id, Carbon::now()->addday(), function()use ($yearsessions) {
+                    return $this->printResults($yearsessions);
+                });
+        $data['month'] = \Cache::remember('month_' . $view_id, Carbon::now()->addday(), function()use($monthsessions) {
+                    return $this->printResults($monthsessions);
+                });
+        $data['week'] = \Cache::remember('week_' . $view_id, Carbon::now()->addday(), function()use($weeksessions) {
+                    return $this->printResults($weeksessions);
+                });
+        $data['day'] = \Cache::remember('day_' . $view_id, Carbon::now()->addday(), function()use($daysessions) {
+                    return $this->printResults($daysessions);
+                });
+        $analytic = \Cache::remember('analytic_' . $view_id, Carbon::now()->addday(), function() {
+                    return $this->getinitializeAnalytics();
+                });
+        $pageviwesobject = \Cache::remember('pageviwesobject_' . $view_id, Carbon::now()->addday(), function()use($analytic, $view_id) {
+                    return self::getReport($analytic, $view_id, '30daysAgo', 'today', array(
+                                'ga:pagePath'));
+                });
 
-        $pagesourceobject = self::getReport($analytic, $view_id, '30daysAgo', 'today', array(
-                    'ga:source'));
-        $pagecountryobject = self::getReport($analytic, $view_id, '30daysAgo', 'today', array(
-                    'ga:country'));
-        $pagedataobject = self::getReport($analytic, $view_id, '30daysAgo', 'today', array(
-                    'ga:deviceCategory'));
-        $pagesystemobject = self::getReport($analytic, $view_id, '30daysAgo', 'today', array(
-                    'ga:operatingSystem'));
+        $pagesourceobject = \Cache::remember('pagesourceobject_' . $view_id, Carbon::now()->addday(), function()use($analytic, $view_id) {
+                    return self::getReport($analytic, $view_id, '30daysAgo', 'today', array(
+                                'ga:source'));
+                });
+        $pagecountryobject = \Cache::remember('pagecountryobject_' . $view_id, Carbon::now()->addday(), function()use($analytic, $view_id) {
+                    return self::getReport($analytic, $view_id, '30daysAgo', 'today', array(
+                                'ga:country'));
+                });
+        $pagedataobject = \Cache::remember('pagedataobject_' . $view_id, Carbon::now()->addday(), function()use($analytic, $view_id) {
+                    return self::getReport($analytic, $view_id, '30daysAgo', 'today', array(
+                                'ga:deviceCategory'));
+                });
+        $pagesystemobject = \Cache::remember('pagesystemobject_' . $view_id, Carbon::now()->addday(), function()use($analytic, $view_id) {
+                    return self::getReport($analytic, $view_id, '30daysAgo', 'today', array(
+                                'ga:operatingSystem'));
+                });
 
 //        dd($pagedefault);
-        $pageviews = self::getResults($pageviwesobject);
-        $data['pagesource'] = self::getResults($pagesourceobject);
+        $pageviews = \Cache::remember('pageviews_' . $view_id, Carbon::now()->addday(), function()use($pageviwesobject) {
+                    return self::getResults($pageviwesobject);
+                });
+        $data['pagesource'] = \Cache::remember('pagesource_' . $view_id, Carbon::now()->addday(), function()use($pagesourceobject) {
+                    return self::getResults($pagesourceobject);
+                });
         $data['pagesource'] = collect($data['pagesource'])->sortBy('sessions')->reverse()->toArray();
-        $pagecountry = self::getResults($pagecountryobject);
-        $pagedata = self::getResults($pagedataobject);
-        $operatingsystems = self::getResults($pagesystemobject);
+        $pagecountry = \Cache::remember('pagecountry_' . $view_id, Carbon::now()->addday(), function()use($pagecountryobject) {
+                    return self::getResults($pagecountryobject);
+                });
+        $pagedata = \Cache::remember('pagedata_' . $view_id, Carbon::now()->addday(), function()use($pagedataobject) {
+                    return self::getResults($pagedataobject);
+                });
+        $operatingsystems = \Cache::remember('operatingsystems_' . $view_id, Carbon::now()->addday(), function()use($pagesystemobject) {
+                    return self::getResults($pagesystemobject);
+                });
         $data['all'] = array_sum(array_column($pagedata, 'sessions'));
         $data['pagecountry'] = collect($pagecountry)->sortBy('sessions')->reverse()->toArray();
         $pageviews = collect($pageviews)->sortBy('sessions')->reverse()->toArray();
@@ -57,13 +98,13 @@ class AnalyticsController extends Controller {
         $data['pagesource'] = array_slice($data['pagesource'], 0, 9);
         $data['pagedata'] = $pagedata;
         $data['systems'] = collect($operatingsystems)->sortBy('sessions')->reverse()->toArray();
-        $channels = self::testgetReport($analytic, $view_id, '30daysAgo', 'today', array(
-                    'ga:channelGrouping'));
-        $data['channels'] = self::getResults($channels);
-      
-        // $results = self::getReport($analytics, '157316086');
-        // $results = self::getReport($analytics, '157273183');
-
+        $channels = \Cache::remember('channels_' . $view_id, Carbon::now()->addday(), function()use($analytic, $view_id) {
+                    return self::testgetReport($analytic, $view_id, '30daysAgo', 'today', array(
+                                'ga:channelGrouping'));
+                });
+        $data['channels'] = \Cache::remember('channels1_' . $view_id, Carbon::now()->addday(), function()use($channels) {
+                    return self::getResults($channels);
+                });
         return view('backend.googleAnalytics.index', $data);
     }
 
@@ -77,7 +118,7 @@ class AnalyticsController extends Controller {
         // Use the developers console and download your service account
         // credentials in JSON format. Place them in this directory or
         // change the key file location if necessary.
-        $KEY_FILE_LOCATION = __DIR__ . '/service-account-credentials.json';
+         $KEY_FILE_LOCATION = base_path(config('analyticsConfig.service_path'));
 
         // Create and configure a new client object.
         $client = new \Google_Client();
@@ -91,7 +132,7 @@ class AnalyticsController extends Controller {
 
     private static function initializeAnalytics() {
 
-        $KEY_FILE_LOCATION = __DIR__ . '/service-account-credentials.json';
+       $KEY_FILE_LOCATION = base_path(config('analyticsConfig.service_path'));
 
         // Create and configure a new client object.
         $client = new Google_Client();
@@ -148,7 +189,7 @@ class AnalyticsController extends Controller {
         $request = new \Google_Service_AnalyticsReporting_ReportRequest();
         $request->setViewId($view_id);
         $request->setDateRanges($dateRange);
-        $request->setMetrics(array($newusers, $sessions, $bouncerate, $users, $avgsessions,$pagesessions));
+        $request->setMetrics(array($newusers, $sessions, $bouncerate, $users, $avgsessions, $pagesessions));
         $request->setDimensions($dimensions);
 
         $body = new \Google_Service_AnalyticsReporting_GetReportsRequest();
